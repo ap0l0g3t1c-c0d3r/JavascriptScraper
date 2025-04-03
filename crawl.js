@@ -1,29 +1,54 @@
 const { JSDOM } = require("jsdom")
 
-
-async function crawlPage(websiteLink){
+//baseURl and websiteLink to be checked
+//we would hold the url that we have crawled in pages
+async function crawlPage(baseURL, websiteLink, pages){
+    
+    const baseURLObj = new URL(baseURL)
+    const currentURLObj = new URL(websiteLink)
+    if(baseURLObj.hostname !== currentURLObj.hostname){
+        return pages //so we only crawl pages where we have same hostname
+    }
+    
+    const normalisedURL = normaliseURL(websiteLink)  
+    if(pages[normalisedURL] > 0){
+        pages[normalisedURL]++
+        return pages
+    }
+    
+    pages[normalisedURL] = 1
+    
     console.log(`fetching data from ${websiteLink}`)
+    
 
     try {
         const res = await fetch(websiteLink)
 
         if( res.status > 399 ){
             console.log(`Error in fetch with status code: ${res.status}`)
-            return
+            return pages
         }
 
         const contentType = res.headers.get("content-type")
 
         if(!contentType.includes("text/html")){
             console.log(`Non-HTML responce: content-Type ${contentType}`)
-            return
+            return pages
         }
 
-        console.log(await res.text())        
+        const htmlBody = await res.text()        
+        const nextURLs = getURLsfromHTML(htmlBody, baseURL)
+
+        //we would iterate over all the links until we have scraped all the pages
+        //or the only pages that are left are for external links
+        for(const nextURL of nextURLs){
+            pages = await crawlPage(baseURL, nextURL, pages)
+        }
+
     } catch (error) {
         console.log(`Error in fetching data ${error} from ${websiteLink}`)
     }
-
+    return pages
 }
 
 function getURLsfromHTML(htmlBody, baseURL){

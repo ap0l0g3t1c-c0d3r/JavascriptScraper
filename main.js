@@ -2,7 +2,7 @@ console.log("Hello this is webScraper")
 
 const {crawlPage} = require("./crawl.js")
 
-function main(){
+async function main(){
     if(process.argv.length < 3){
         console.log("Please provide website to crawl")
         process.exit(1)
@@ -15,7 +15,12 @@ function main(){
     
     const baseURL = process.argv[2]
     
-    crawlPage(baseURL)
+    //passing baseURl twice since we want to recursively check all the URLs
+    const pages  = await crawlPage(baseURL, baseURL, {})
+
+    for(let page of Object.entries(pages)){
+        console.log(page)
+    }
     
 }   
 
