@@ -1,5 +1,31 @@
 const { JSDOM } = require("jsdom")
 
+
+async function crawlPage(websiteLink){
+    console.log(`fetching data from ${websiteLink}`)
+
+    try {
+        const res = await fetch(websiteLink)
+
+        if( res.status > 399 ){
+            console.log(`Error in fetch with status code: ${res.status}`)
+            return
+        }
+
+        const contentType = res.headers.get("content-type")
+
+        if(!contentType.includes("text/html")){
+            console.log(`Non-HTML responce: content-Type ${contentType}`)
+            return
+        }
+
+        console.log(await res.text())        
+    } catch (error) {
+        console.log(`Error in fetching data ${error} from ${websiteLink}`)
+    }
+
+}
+
 function getURLsfromHTML(htmlBody, baseURL){
     let url = []
     const dom = new JSDOM(htmlBody)
@@ -38,5 +64,6 @@ function normaliseURL(urlstring){
 
 module.exports = {
     normaliseURL,
-    getURLsfromHTML
+    getURLsfromHTML,
+    crawlPage
 }
