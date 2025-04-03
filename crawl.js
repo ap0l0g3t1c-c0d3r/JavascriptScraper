@@ -62,9 +62,9 @@ function getURLsfromHTML(htmlBody, baseURL){
                 //relative URl
                 const urlObj = new URL(`${baseURL}${linkElement.href}`)
                 url.push(urlObj.href)
-           } catch (error) {
+            } catch (error) {
                 console.log("Error with relative URL:", error.message)
-           }
+            }
         }else{
             try {
                 //absolute url
